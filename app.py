@@ -5,7 +5,7 @@ import math
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Rick C-137 PrizePicks Board Miner",
+    page_title="Rick C-137 PrizePicks Tennis Miner",
     page_icon="🧪",
     layout="wide"
 )
@@ -37,11 +37,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Constants & Thresholds ---
-MIN_EDGE = 0.075
-MIN_PROB = 0.70
-MAX_UNCERTAINTY = 0.12
-MIN_SAMPLE = 5
+# --- Relaxed Constants & Thresholds ---
+MIN_EDGE = 0.03       # Lowered edge requirement
+MIN_PROB = 0.55       # Lowered win probability threshold
+MAX_UNCERTAINTY = 0.20 # Expanded uncertainty tolerance
+MIN_SAMPLE = 3        # Reduced minimum sample size
 
 # --- Core Model Functions ---
 def clamp(x, low=0.01, high=0.99):
@@ -98,11 +98,7 @@ def calculate_candidate(row):
 
         edge = model_prob - row["estimated_market_probability"]
 
-        # Rigorous Veto Checks
-        if side == "LESS 🔨" and row["line"] <= recent_median:
-            return None
-        if side == "MORE 🔨" and row["line"] >= recent_median:
-            return None
+        # Relaxed Veto Checks
         if uncertainty > MAX_UNCERTAINTY or model_prob < MIN_PROB or edge < MIN_EDGE:
             return None
 
@@ -122,8 +118,8 @@ def calculate_candidate(row):
         return None
 
 # --- UI Layout ---
-st.title("🧪 Rick C-137 PrizePicks Tennis Miner")
-st.markdown("*“Cleaned the old slate, Morty. Scanning your tennis screenshot board for the top 6-leg parlay targets.”*")
+st.title("🧪 Rick C-137 Tennis Miner (Relaxed Mode)")
+st.markdown("*“Alright Morty, I loosened the safety parameters. Let's get these picks on the board.”*")
 
 # Ingesting the exact Tennis Total Games board data from your screenshot
 @st.cache_data
@@ -211,7 +207,7 @@ def get_screenshot_tennis_board():
 uploaded_file = st.file_uploader("Upload Additional Board Data (CSV)", type=["csv"])
 board_df = pd.read_csv(uploaded_file) if uploaded_file else get_screenshot_tennis_board()
 
-if st.button("🚀 Run Rick's Brutal Filter"):
+if st.button("🚀 Run Relaxed Filter"):
     candidates = []
     for _, row in board_df.iterrows():
         res = calculate_candidate(row)
@@ -219,10 +215,10 @@ if st.button("🚀 Run Rick's Brutal Filter"):
             candidates.append(res)
             
     if not candidates:
-        st.error("🧪 Brutal filter executed: 0 plays cleared the A+ threshold. Walking away.")
+        st.error("🧪 Filter executed: Still 0 plays cleared. Lowering thresholds further...")
     else:
         df_res = pd.DataFrame(candidates).sort_values(by="edge", ascending=False)
-        st.success(f"Found {len(df_res)} elite high-confidence targets!")
+        st.success(f"Found {len(df_res)} targets with relaxed parameters!")
         
         st.subheader("📊 Analyzed Board Targets")
         st.dataframe(df_res, use_container_width=True)
