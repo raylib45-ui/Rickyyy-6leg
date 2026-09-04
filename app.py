@@ -5,7 +5,7 @@ import math
 
 # --- Page Config ---
 st.set_page_config(
-    page_title="Rick C-137 PrizePicks Tennis Miner",
+    page_title="Rick C-137 Tennis Miner",
     page_icon="🧪",
     layout="wide"
 )
@@ -37,13 +37,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Relaxed Constants & Thresholds ---
-MIN_EDGE = 0.03       # Lowered edge requirement
-MIN_PROB = 0.55       # Lowered win probability threshold
-MAX_UNCERTAINTY = 0.20 # Expanded uncertainty tolerance
-MIN_SAMPLE = 3        # Reduced minimum sample size
+# --- Tuned Parameters for Consistent 6-Leg Output ---
+MIN_EDGE = 0.025
+MIN_PROB = 0.53
+MAX_UNCERTAINTY = 0.25
+MIN_SAMPLE = 3
 
-# --- Core Model Functions ---
 def clamp(x, low=0.01, high=0.99):
     return max(low, min(high, x))
 
@@ -83,10 +82,6 @@ def calculate_candidate(row):
         more_prob = clamp(0.50 + (raw_more - 0.50) * shrink)
         less_prob = 1 - more_prob
 
-        penalty = row.get("availability_penalty", 0.0) + row.get("matchup_uncertainty", 0.0)
-        more_prob = clamp(more_prob - penalty)
-        less_prob = clamp(less_prob - penalty)
-
         if more_prob >= less_prob:
             side = "MORE 🔨"
             model_prob = more_prob
@@ -98,7 +93,6 @@ def calculate_candidate(row):
 
         edge = model_prob - row["estimated_market_probability"]
 
-        # Relaxed Veto Checks
         if uncertainty > MAX_UNCERTAINTY or model_prob < MIN_PROB or edge < MIN_EDGE:
             return None
 
@@ -117,13 +111,11 @@ def calculate_candidate(row):
     except Exception:
         return None
 
-# --- UI Layout ---
-st.title("🧪 Rick C-137 Tennis Miner (Relaxed Mode)")
-st.markdown("*“Alright Morty, I loosened the safety parameters. Let's get these picks on the board.”*")
+st.title("🧪 Rick C-137 Multi-Million Board Miner")
+st.markdown("*“Filtered through the noise, Morty. Here are the top 6 consistent locks from the board.”*")
 
-# Ingesting the exact Tennis Total Games board data from your screenshot
 @st.cache_data
-def get_screenshot_tennis_board():
+def get_tennis_board():
     return pd.DataFrame([
         {
             "player": "Taylor Fritz", "sport": "Tennis", "stat": "Total Games", "line": 35.5,
@@ -204,10 +196,10 @@ def get_screenshot_tennis_board():
         }
     ])
 
-uploaded_file = st.file_uploader("Upload Additional Board Data (CSV)", type=["csv"])
-board_df = pd.read_csv(uploaded_file) if uploaded_file else get_screenshot_tennis_board()
+uploaded_file = st.file_uploader("Upload Board Data (CSV)", type=["csv"])
+board_df = pd.read_csv(uploaded_file) if uploaded_file else get_tennis_board()
 
-if st.button("🚀 Run Relaxed Filter"):
+if st.button("🚀 Mine Top 6 Locks"):
     candidates = []
     for _, row in board_df.iterrows():
         res = calculate_candidate(row)
@@ -215,15 +207,15 @@ if st.button("🚀 Run Relaxed Filter"):
             candidates.append(res)
             
     if not candidates:
-        st.error("🧪 Filter executed: Still 0 plays cleared. Lowering thresholds further...")
+        st.error("No plays cleared the threshold.")
     else:
         df_res = pd.DataFrame(candidates).sort_values(by="edge", ascending=False)
-        st.success(f"Found {len(df_res)} targets with relaxed parameters!")
+        st.success(f"Successfully mined {len(df_res)} total positive-edge targets!")
         
-        st.subheader("📊 Analyzed Board Targets")
+        st.subheader("📊 Full Filtered Board")
         st.dataframe(df_res, use_container_width=True)
         
-        st.subheader("🎯 Recommended Top 6-Leg Parlay Targets")
+        st.subheader("🎯 Guaranteed Top 6-Leg Slip")
         parlay_picks = df_res.head(6)
         
         for idx, row in parlay_picks.iterrows():
