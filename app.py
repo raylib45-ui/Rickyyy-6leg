@@ -106,88 +106,59 @@ def calculate_candidate(row):
         return None
 
 st.title("🧪 Rick C-137 24/7 Live Player Props Miner")
-st.markdown('*“Clean execution, Morty. The app stays live 24/7 without blocking loops.”*')
+st.markdown("*“Hardcoded fallback data was holding onto old board entries, Morty. Use the live CSV uploader below to feed current PrizePicks lines instantly.”*")
 st.markdown('<span class="live-badge">🟢 LIVE 24/7 PLAYER PROPS ACTIVE</span>', unsafe_allow_html=True)
 st.write("")
 
+# Blank default DataFrame so old expired players don't show unless loaded via CSV or updated live board
 @st.cache_data(ttl=600)
 def get_live_player_props_board():
-    return pd.DataFrame([
-        {
-            "player": "Blake Snell", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 6.5,
-            "recent_results": [7.0, 8.0, 7.0, 9.0],
-            "season_projection": 7.4, "matchup_projection": 7.6, "role_projection": 7.2,
-            "pace_volume_projection": 1.08, "market_baseline_uncertainty": 0.05,
-            "sport_variance_factor": 0.9, "estimated_market_probability": 0.52
-        },
-        {
-            "player": "Logan Gilbert", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 5.5,
-            "recent_results": [6.0, 7.0, 6.0, 8.0],
-            "season_projection": 6.3, "matchup_projection": 6.5, "role_projection": 6.2,
-            "pace_volume_projection": 1.05, "market_baseline_uncertainty": 0.05,
-            "sport_variance_factor": 0.9, "estimated_market_probability": 0.52
-        },
-        {
-            "player": "Shota Imanaga", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 6.5,
-            "recent_results": [7.0, 6.0, 8.0, 7.0],
-            "season_projection": 7.0, "matchup_projection": 7.2, "role_projection": 6.9,
-            "pace_volume_projection": 1.04, "market_baseline_uncertainty": 0.06,
-            "sport_variance_factor": 0.95, "estimated_market_probability": 0.52
-        },
-        {
-            "player": "Nolan McLean", "sport": "MLB", "stat": "Pitcher Fantasy Score", "line": 36.5,
-            "recent_results": [41.0, 42.0, 40.0, 43.0],
-            "season_projection": 41.5, "matchup_projection": 41.0, "role_projection": 41.2,
-            "pace_volume_projection": 1.06, "market_baseline_uncertainty": 0.06,
-            "sport_variance_factor": 0.95, "estimated_market_probability": 0.52
-        },
-        {
-            "player": "Zebby Matthews", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 4.5,
-            "recent_results": [5.0, 6.0, 5.0, 6.0],
-            "season_projection": 5.4, "matchup_projection": 5.5, "role_projection": 5.2,
-            "pace_volume_projection": 1.05, "market_baseline_uncertainty": 0.06,
-            "sport_variance_factor": 0.95, "estimated_market_probability": 0.53
-        },
-        {
-            "player": "kyousuke", "sport": "CS2", "stat": "Map Kills (Maps 1/2)", "line": 33.5,
-            "recent_results": [28.0, 27.0, 29.0, 26.0],
-            "season_projection": 27.5, "matchup_projection": 27.0, "role_projection": 27.2,
-            "pace_volume_projection": 0.92, "market_baseline_uncertainty": 0.07,
-            "sport_variance_factor": 1.1, "estimated_market_probability": 0.54
-        }
+    return pd.DataFrame(columns=[
+        "player", "sport", "stat", "line", "recent_results", 
+        "season_projection", "matchup_projection", "role_projection", 
+        "pace_volume_projection", "market_baseline_uncertainty", 
+        "sport_variance_factor", "estimated_market_probability"
     ])
 
-uploaded_file = st.file_uploader("Upload Live Player Props CSV (Optional)", type=["csv"])
-board_df = pd.read_csv(uploaded_file) if uploaded_file else get_live_player_props_board()
+uploaded_file = st.file_uploader("Upload Current PrizePicks Board CSV", type=["csv"])
 
-candidates = []
-for _, row in board_df.iterrows():
-    res = calculate_candidate(row)
-    if res:
-        candidates.append(res)
-
-if not candidates:
-    st.error("No valid player prop rows found. Check CSV structure.")
+if uploaded_file is not None:
+    board_df = pd.read_csv(uploaded_file)
+    st.success("Successfully loaded custom board CSV!")
 else:
-    df_res = pd.DataFrame(candidates).sort_values(by="edge", ascending=False)
-    st.success(f"Successfully processed {len(df_res)} individual player props!")
-    
-    st.subheader("🎯 Live 24/7 Top 6-Leg Player Prop Slip")
-    parlay_picks = df_res.head(6)
-    
-    for idx, row in parlay_picks.iterrows():
-        st.markdown(f"""
-        <div class="hammer-card">
-            <b>{row['player']}</b> ({row['sport']} - {row['stat']})<br>
-            Line: <b>{row['line']}</b> | Action: <span style="color:#00ff66;"><b>{row['side']}</b></span><br>
-            Model Prob: <b>{row['model_prob']}%</b> | Edge: <b>+{row['edge']}%</b> | Projection: <b>{row['projection']}</b>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    st.subheader("📊 Full Live Player Props Analysis Table")
-    st.dataframe(df_res, use_container_width=True)
+    st.info("💡 **Action Required:** Upload your current PrizePicks CSV export below or paste your live lines. (The old cached fallback players have been cleared so nothing expired shows up).")
+    board_df = get_live_player_props_board()
 
-# Manual refresh button for fresh data pulls
-if st.button("🔄 Refresh Data Now"):
+if board_df.empty:
+    st.warning("No active player props loaded. Please upload a CSV file containing your active board lines to generate the model slip.")
+else:
+    candidates = []
+    for _, row in board_df.iterrows():
+        res = calculate_candidate(row)
+        if res:
+            candidates.append(res)
+
+    if not candidates:
+        st.error("No valid player prop rows found. Check CSV structure.")
+    else:
+        df_res = pd.DataFrame(candidates).sort_values(by="edge", ascending=False)
+        st.success(f"Successfully processed {len(df_res)} active individual player props!")
+        
+        st.subheader("🎯 Live Top 6-Leg Player Prop Slip")
+        parlay_picks = df_res.head(6)
+        
+        for idx, row in parlay_picks.iterrows():
+            st.markdown(f"""
+            <div class="hammer-card">
+                <b>{row['player']}</b> ({row['sport']} - {row['stat']})<br>
+                Line: <b>{row['line']}</b> | Action: <span style="color:#00ff66;"><b>{row['side']}</b></span><br>
+                Model Prob: <b>{row['model_prob']}%</b> | Edge: <b>+{row['edge']}%</b> | Projection: <b>{row['projection']}</b>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        st.subheader("📊 Full Active Player Props Analysis Table")
+        st.dataframe(df_res, use_container_width=True)
+
+if st.button("🔄 Clear Cache & Refresh"):
     st.cache_data.clear()
     st.rerun()
