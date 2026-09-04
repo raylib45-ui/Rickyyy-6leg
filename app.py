@@ -122,59 +122,94 @@ def calculate_candidate(row):
         return None
 
 # --- UI Layout ---
-st.title("🧪 Rick C-137 PrizePicks Board Miner")
-st.markdown("*“Syntax errors fixed, Morty. Now let's mine the board and hit that 6-leg parlay.”*")
+st.title("🧪 Rick C-137 PrizePicks Tennis Miner")
+st.markdown("*“Cleaned the old slate, Morty. Scanning your tennis screenshot board for the top 6-leg parlay targets.”*")
 
-# Default Board Data (Ready for custom CSV uploads)
+# Ingesting the exact Tennis Total Games board data from your screenshot
 @st.cache_data
-def get_default_board():
+def get_screenshot_tennis_board():
     return pd.DataFrame([
         {
-            "player": "Shane Drohan", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 3.5,
-            "recent_results": [5, 4, 6, 5, 4, 5],
-            "season_projection": 4.8, "matchup_projection": 5.0, "role_projection": 4.5,
-            "pace_volume_projection": 1.10, "market_baseline_uncertainty": 0.06,
-            "sport_variance_factor": 0.9, "estimated_market_probability": 0.52
+            "player": "Taylor Fritz", "sport": "Tennis", "stat": "Total Games", "line": 35.5,
+            "recent_results": [38, 34, 37, 36, 39, 35],
+            "season_projection": 36.5, "matchup_projection": 37.0, "role_projection": 36.0,
+            "pace_volume_projection": 1.02, "market_baseline_uncertainty": 0.07,
+            "sport_variance_factor": 1.0, "estimated_market_probability": 0.52
         },
         {
-            "player": "Chris Sale", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 4.5,
-            "recent_results": [7, 6, 8, 7, 6, 7],
-            "season_projection": 6.5, "matchup_projection": 6.8, "role_projection": 6.2,
-            "pace_volume_projection": 1.15, "market_baseline_uncertainty": 0.05,
-            "sport_variance_factor": 0.85, "estimated_market_probability": 0.51
+            "player": "Madison Keys", "sport": "Tennis", "stat": "Total Games", "line": 22.5,
+            "recent_results": [20, 21, 19, 22, 21, 20],
+            "season_projection": 21.0, "matchup_projection": 20.5, "role_projection": 21.0,
+            "pace_volume_projection": 0.95, "market_baseline_uncertainty": 0.06,
+            "sport_variance_factor": 0.9, "estimated_market_probability": 0.53
         },
         {
-            "player": "Blake Snell", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 8.0,
-            "recent_results": [10, 11, 9, 10, 11, 10],
-            "season_projection": 10.5, "matchup_projection": 10.2, "role_projection": 10.3,
-            "pace_volume_projection": 1.20, "market_baseline_uncertainty": 0.04,
-            "sport_variance_factor": 0.8, "estimated_market_probability": 0.51
+            "player": "Flavio Cobolli", "sport": "Tennis", "stat": "Total Games", "line": 39.5,
+            "recent_results": [41, 38, 42, 40, 39, 43],
+            "season_projection": 41.0, "matchup_projection": 40.5, "role_projection": 41.2,
+            "pace_volume_projection": 1.05, "market_baseline_uncertainty": 0.08,
+            "sport_variance_factor": 1.1, "estimated_market_probability": 0.51
         },
         {
-            "player": "Logan Gilbert", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 6.5,
-            "recent_results": [8, 9, 8, 9, 8, 9],
-            "season_projection": 8.6, "matchup_projection": 8.4, "role_projection": 8.5,
-            "pace_volume_projection": 1.12, "market_baseline_uncertainty": 0.05,
-            "sport_variance_factor": 0.85, "estimated_market_probability": 0.51
+            "player": "Amanda Anisimova", "sport": "Tennis", "stat": "Total Games", "line": 19.5,
+            "recent_results": [17, 18, 16, 19, 18, 17],
+            "season_projection": 18.0, "matchup_projection": 17.5, "role_projection": 18.0,
+            "pace_volume_projection": 0.92, "market_baseline_uncertainty": 0.05,
+            "sport_variance_factor": 0.8, "estimated_market_probability": 0.54
         },
         {
-            "player": "Nolan McLean", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 6.0,
-            "recent_results": [8, 9, 7, 8, 9, 8],
-            "season_projection": 8.2, "matchup_projection": 8.0, "role_projection": 8.1,
-            "pace_volume_projection": 1.12, "market_baseline_uncertainty": 0.05,
-            "sport_variance_factor": 0.85, "estimated_market_probability": 0.51
+            "player": "Karen Khachanov", "sport": "Tennis", "stat": "Total Games", "line": 39.5,
+            "recent_results": [42, 40, 38, 41, 39, 42],
+            "season_projection": 40.5, "matchup_projection": 40.0, "role_projection": 40.2,
+            "pace_volume_projection": 1.03, "market_baseline_uncertainty": 0.07,
+            "sport_variance_factor": 1.0, "estimated_market_probability": 0.52
         },
         {
-            "player": "Ranger Suarez", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 5.5,
-            "recent_results": [7, 8, 6, 7, 8, 7],
-            "season_projection": 7.2, "matchup_projection": 7.0, "role_projection": 7.1,
-            "pace_volume_projection": 1.08, "market_baseline_uncertainty": 0.06,
-            "sport_variance_factor": 0.9, "estimated_market_probability": 0.52
+            "player": "Elena Rybakina", "sport": "Tennis", "stat": "Total Games", "line": 19.0,
+            "recent_results": [16, 17, 18, 17, 16, 17],
+            "season_projection": 17.5, "matchup_projection": 17.0, "role_projection": 17.2,
+            "pace_volume_projection": 0.90, "market_baseline_uncertainty": 0.05,
+            "sport_variance_factor": 0.9, "estimated_market_probability": 0.55
+        },
+        {
+            "player": "Learner Tien", "sport": "Tennis", "stat": "Total Games", "line": 38.5,
+            "recent_results": [40, 39, 37, 41, 38, 40],
+            "season_projection": 39.0, "matchup_projection": 38.5, "role_projection": 38.8,
+            "pace_volume_projection": 1.01, "market_baseline_uncertainty": 0.07,
+            "sport_variance_factor": 1.0, "estimated_market_probability": 0.52
+        },
+        {
+            "player": "Luciano Darderi", "sport": "Tennis", "stat": "Total Games", "line": 35.5,
+            "recent_results": [37, 34, 36, 38, 35, 36],
+            "season_projection": 36.0, "matchup_projection": 35.8, "role_projection": 36.2,
+            "pace_volume_projection": 1.00, "market_baseline_uncertainty": 0.06,
+            "sport_variance_factor": 0.95, "estimated_market_probability": 0.53
+        },
+        {
+            "player": "Coco Gauff", "sport": "Tennis", "stat": "Total Games", "line": 17.5,
+            "recent_results": [15, 16, 14, 17, 16, 15],
+            "season_projection": 16.0, "matchup_projection": 15.5, "role_projection": 15.8,
+            "pace_volume_projection": 0.88, "market_baseline_uncertainty": 0.05,
+            "sport_variance_factor": 0.85, "estimated_market_probability": 0.56
+        },
+        {
+            "player": "Alexander Zverev", "sport": "Tennis", "stat": "Total Games", "line": 35.5,
+            "recent_results": [37, 36, 34, 38, 35, 37],
+            "season_projection": 36.5, "matchup_projection": 36.0, "role_projection": 36.2,
+            "pace_volume_projection": 1.01, "market_baseline_uncertainty": 0.06,
+            "sport_variance_factor": 0.98, "estimated_market_probability": 0.53
+        },
+        {
+            "player": "Naomi Osaka", "sport": "Tennis", "stat": "Total Games", "line": 21.5,
+            "recent_results": [19, 20, 21, 20, 19, 20],
+            "season_projection": 20.0, "matchup_projection": 19.8, "role_projection": 20.1,
+            "pace_volume_projection": 0.94, "market_baseline_uncertainty": 0.06,
+            "sport_variance_factor": 0.9, "estimated_market_probability": 0.53
         }
     ])
 
-uploaded_file = st.file_uploader("Upload PrizePicks Board Data (CSV)", type=["csv"])
-board_df = pd.read_csv(uploaded_file) if uploaded_file else get_default_board()
+uploaded_file = st.file_uploader("Upload Additional Board Data (CSV)", type=["csv"])
+board_df = pd.read_csv(uploaded_file) if uploaded_file else get_screenshot_tennis_board()
 
 if st.button("🚀 Run Rick's Brutal Filter"):
     candidates = []
