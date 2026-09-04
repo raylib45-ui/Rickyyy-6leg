@@ -2,17 +2,13 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import math
-from streamlit_autorefresh import st_autorefresh
+import time
 
-# --- Page Config ---
 st.set_page_config(
     page_title="Rick C-137 24/7 Live Player Props Miner",
     page_icon="🧪",
     layout="wide"
 )
-
-# --- Auto-Refresh Component (Every 10 Minutes = 600,000 ms) ---
-count = st_autorefresh(interval=600 * 1000, key="dataminer_refresh_counter")
 
 st.markdown("""
     <style>
@@ -111,13 +107,12 @@ def calculate_candidate(row):
         return None
 
 st.title("🧪 Rick C-137 24/7 Live Player Props Miner")
-st.markdown('*“Auto-rebuilding every 10 minutes live 24/7, Morty. Only individual player props flow through.”*')
+st.markdown("*“Removed external dependencies, Morty. Using native auto-refresh loops so it builds cleanly without errors.”*")
 st.markdown('<span class="live-badge">🟢 LIVE 24/7 AUTO-REFRESH ACTIVE (Every 10 Mins)</span>', unsafe_allow_html=True)
 st.write("")
 
 @st.cache_data(ttl=600)
 def get_live_player_props_board():
-    # Strictly individual player props feed (MLB Strikeouts, Fantasy Score, Esports Kills)
     return pd.DataFrame([
         {
             "player": "Blake Snell", "sport": "MLB", "stat": "Pitcher Strikeouts", "line": 6.5,
@@ -176,7 +171,7 @@ if not candidates:
     st.error("No valid player prop rows found. Check CSV structure.")
 else:
     df_res = pd.DataFrame(candidates).sort_values(by="edge", ascending=False)
-    st.success(f"Live 24/7 Refresh #{count}: Successfully processed {len(df_res)} individual player props!")
+    st.success(f"Successfully processed {len(df_res)} individual player props!")
     
     st.subheader("🎯 Live 24/7 Top 6-Leg Player Prop Slip")
     parlay_picks = df_res.head(6)
@@ -192,3 +187,7 @@ else:
         
     st.subheader("📊 Full Live Player Props Analysis Table")
     st.dataframe(df_res, use_container_width=True)
+
+# Native 10-minute refresh trigger without external pip modules
+time.sleep(600)
+st.rerun()
