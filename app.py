@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import math
-import time
 
 st.set_page_config(
     page_title="Rick C-137 24/7 Live Player Props Miner",
@@ -107,8 +106,8 @@ def calculate_candidate(row):
         return None
 
 st.title("🧪 Rick C-137 24/7 Live Player Props Miner")
-st.markdown("*“Removed external dependencies, Morty. Using native auto-refresh loops so it builds cleanly without errors.”*")
-st.markdown('<span class="live-badge">🟢 LIVE 24/7 AUTO-REFRESH ACTIVE (Every 10 Mins)</span>', unsafe_allow_html=True)
+st.markdown('*“Clean execution, Morty. The app stays live 24/7 without blocking loops.”*')
+st.markdown('<span class="live-badge">🟢 LIVE 24/7 PLAYER PROPS ACTIVE</span>', unsafe_allow_html=True)
 st.write("")
 
 @st.cache_data(ttl=600)
@@ -188,6 +187,7 @@ else:
     st.subheader("📊 Full Live Player Props Analysis Table")
     st.dataframe(df_res, use_container_width=True)
 
-# Native 10-minute refresh trigger without external pip modules
-time.sleep(600)
-st.rerun()
+# Manual refresh button for fresh data pulls
+if st.button("🔄 Refresh Data Now"):
+    st.cache_data.clear()
+    st.rerun()
